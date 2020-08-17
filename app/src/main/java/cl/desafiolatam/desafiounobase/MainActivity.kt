@@ -1,21 +1,29 @@
 package cl.desafiolatam.desafiounobase
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.android.synthetic.main.activity_main.*
+import java.security.Key
 
 class MainActivity : AppCompatActivity() {
-    lateinit var nameInput: TextInputEditText
+
     lateinit var advance: Button
     lateinit var container: ConstraintLayout
+    lateinit var preferences :SharedPreferences
+    val filename = "cl.desafiolatam.desafiounobase.MainActivity"
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        nameInput = findViewById(R.id.name_input)
+        preferences =  getSharedPreferences(filename,Context.MODE_PRIVATE)
         advance = findViewById(R.id.login_button)
         container = findViewById(R.id.container)
         setUpListeners()
@@ -23,11 +31,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpListeners() {
         advance.setOnClickListener {
-            if (nameInput.text!!.isNotEmpty()) {
+            if (name_input.text!!.isNotEmpty()) {
                 val intent: Intent
                 if (hasSeenWelcome()) {
                     intent = Intent(this, HomeActivity::class.java)
                 } else {
+                    saveUsuario(name_input.text.toString())
                     intent = Intent(this, WelcomeActivity::class.java)
                 }
                 startActivity(intent)
@@ -38,10 +47,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hasSeenWelcome(): Boolean {
-        var returnValue = false
-        //implementar este método para saber si el usuario ya ha entrado a la aplicación y ha visto
-        //la pantalla de bienvenida. Este método permite decidir que pantalla se muestra después de presionar Ingresar
-        //recorra la lista de usuarios
-        return returnValue
+
+       // val preferences =  getPreferences(Context.MODE_PRIVATE)
+        val stringSet = preferences.getStringSet("usuario", setOf())
+        return stringSet.contains(name_input.text.toString())
+
+
+    }
+    private fun saveUsuario (userName : String){
+        val setString = preferences.getStringSet("usuario",setOf())
+
+        setString.add(userName)
+        preferences.edit().putStringSet("usuario",setString).apply()
+
     }
 }
